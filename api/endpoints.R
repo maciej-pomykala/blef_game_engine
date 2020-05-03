@@ -267,19 +267,23 @@ function(game_uuid, player_uuid = "", res, round = -1) {
 #* @param action_id The id of the action (bet or check).
 #* @get /v1/games/<game_uuid>/play
 function(game_uuid, player_uuid, res, action_id) {
-  
+  cat(file = "log_player.txt", player_uuid)
+  cat(file = "log_action.txt", action_id)
+
   # Check if the supplied game UUID is a valid UUID before loading the game
   if (!validate_uuid(game_uuid)) {
     res$status <- 400
     return(list(error = "Invalid game UUID"))
   }
+  cat(file = "log_milestones.txt", "milestone a")
 
   # Check if game exists
   if (!file.exists(get_path(game_uuid))) {
     res$status <- 400
     return(list(error = "Game does not exist"))
   }
-
+  cat(file = "log_milestones.txt", "milestone b")
+  
   game <- readRDS(get_path(game_uuid))
   # Check if game is currently running
   if (game$status == "Not started") {
@@ -290,40 +294,46 @@ function(game_uuid, player_uuid, res, action_id) {
     res$status <- 400
     return(list(error = "This game has already finished"))
   }
-
+  cat(file = "log_milestones.txt", "milestone c")
+  
   # Check if player UUID has been supplied
   if (missing(player_uuid)) {
     res$status <- 400
     return(list(error = "Player UUID missing - please supply it"))
   }
-
+  cat(file = "log_milestones.txt", "milestone d")
+  
   player_uuid %<>% str_to_lower()
   # Check whether the player UUID is a valid UUID
   if (!validate_uuid(player_uuid)) {
     res$status <- 400
     return(list(error = "Invalid player UUID"))
   }
-
+  cat(file = "log_milestones.txt", "milestone e")
+  
   # Check if the player UUID matches the UUID of the current player
   auth_success <- player_uuid == game$players$uuid[game$players$nickname == game$cp_nickname]
   if (!auth_success) {
     res$status <- 400
     return(list(error = "The submitted UUID does not match the UUID of the current player"))
   }
-
+  cat(file = "log_milestones.txt", "milestone f")
+  
   # Check if action ID has been supplied
   if (missing(action_id)) {
     res$status <- 400
     return(list(error = "Action ID missing - please supply it"))
   }
-
+  cat(file = "log_milestones.txt", "milestone g")
+  
   # Check whether the particular action is allowed right now
   action_id <- as.numeric(action_id)
   if (!action_id %in% c(0:88)) {
     res$status <- 400
     return(list(error = "Action ID must be an integer between 0 and 88"))
   }
-
+  cat(file = "log_milestones.txt", "milestone h")
+  
   if (nrow(game$history) == 0) {
     action_allowed <- action_id %in% 0:87
   } else {
